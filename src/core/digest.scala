@@ -44,6 +44,14 @@ final case class HashFunction[A <: HashScheme](name: String) extends AnyVal {
   def init: DigestAccumulator = new DigestAccumulator(MessageDigest.getInstance(name))
 }
 
+case class Multihash[A <: HashScheme](prefix: Byte) extends AnyVal
+
+object Multihash {
+  implicit val md5 = Multihash[Md5](0xd5.toByte)
+  implicit val sha256 = Multihash[Sha256](0x12.toByte)
+  implicit val sha1 = Multihash[Sha1](0x11.toByte)
+}
+
 trait HashScheme
 trait Md5 extends HashScheme
 trait Sha256 extends HashScheme
@@ -52,6 +60,14 @@ trait Sha1 extends HashScheme
 final case class Digest(bytes: Bytes) extends AnyVal {
   override def toString: String = ByteEncoder.base64.encode(bytes)
   def encoded[ES <: EncodingScheme: ByteEncoder]: String = bytes.encoded[ES]
+  def multihash[A <: HashScheme: Multihash] = MultihashDigest[A](bytes)
+}
+
+final case class MultihashDigest[A <: HashScheme: Multihash](bytes: Bytes) {
+  //TODO add multihash support for digests longer than 255 bytes
+  private def multihashBytes: Bytes = Bytes(Array(implicitly[Multihash[A]].prefix, bytes.size.toByte) ++ bytes.array)
+  override def toString: String = ByteEncoder.base64.encode(multihashBytes)
+  def encoded[ES <: EncodingScheme: ByteEncoder]: String = multihashBytes.encoded[ES]
 }
 
 object Hashable {

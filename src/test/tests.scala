@@ -33,6 +33,10 @@ object Tests {
       test("Sha1, Base64Url"){
         "Hello world".digest[Sha1].encoded[Base64Url]
       }("e1AsOh9IyGCa4hLN-2Od7jlnP14") ::
+      test("Sha256, Hex, Multihash"){
+        //FIXME x.digest[Sha256].multihash[Sha1] would also compile
+        "Hello world".digest[Sha256].multihash[Sha256].encoded[Hex]
+      }("122064EC88CA00B268E5BA1A35678A1B5316D212F4F366B2477232534A8AECA37F3C") ::
       Nil
     
     val passed = allResults.filter(_ == true).size
