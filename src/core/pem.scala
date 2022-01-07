@@ -27,7 +27,7 @@ case class Pem(kind: Text, data: Bytes):
   ).flatten.join(t"\n")
 
 object Pem:
-  def parse(string: Text): Pem throws PemParseError =
+  def parse(string: Text): Pem =
     val lines = string.trim.nn.cut(t"\n")
     
     val label = lines.head match
